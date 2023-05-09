@@ -55,16 +55,21 @@ export const generateDefaultConfigParams = (
   return { configInitInfo, configKeypairs };
 };
 
-export const createInOrderMints = async (context: WhirlpoolContext, reuseTokenA?: PublicKey) => {
+export const createInOrderMints = async (context: WhirlpoolContext, reuseTokenA?: PublicKey, reuseTokenB?: PublicKey) => {
   const provider = context.provider;
   const tokenXMintPubKey = reuseTokenA ?? (await createMint(provider));
 
-  // ensure reuseTokenA is the first mint if reuseTokenA is provided
   let ordered;
-  do {
-    const tokenYMintPubKey = await createMint(provider);
+  if(reuseTokenB) {
+    const tokenYMintPubKey = reuseTokenB
     ordered = PoolUtil.orderMints(tokenXMintPubKey, tokenYMintPubKey).map(AddressUtil.toPubKey);
-  } while (!!reuseTokenA && !ordered[0].equals(reuseTokenA));
+  } else {
+    // ensure reuseTokenA is the first mint if reuseTokenA is provided
+    do {
+      const tokenYMintPubKey = await createMint(provider);
+      ordered = PoolUtil.orderMints(tokenXMintPubKey, tokenYMintPubKey).map(AddressUtil.toPubKey);
+    } while (!!reuseTokenA && !ordered[0].equals(reuseTokenA));
+  }
   return ordered;
 };
 
@@ -75,9 +80,10 @@ export const generateDefaultInitPoolParams = async (
   tickSpacing: number,
   initSqrtPrice = MathUtil.toX64(new Decimal(5)),
   funder?: PublicKey,
-  reuseTokenA?: PublicKey
+  reuseTokenA?: PublicKey,
+  reuseTokenB?: PublicKey
 ): Promise<InitPoolParams> => {
-  const [tokenAMintPubKey, tokenBMintPubKey] = await createInOrderMints(context, reuseTokenA);
+  const [tokenAMintPubKey, tokenBMintPubKey] = await createInOrderMints(context, reuseTokenA, reuseTokenB);
 
   const whirlpoolPda = PDAUtil.getWhirlpool(
     context.program.programId,

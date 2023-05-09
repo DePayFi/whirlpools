@@ -299,7 +299,8 @@ export async function buildTestPoolParams(
   defaultFeeRate = 3000,
   initSqrtPrice = DEFAULT_SQRT_PRICE,
   funder?: PublicKey,
-  reuseTokenA?: PublicKey
+  reuseTokenA?: PublicKey,
+  reuseTokenB?: PublicKey
 ) {
   const { configInitInfo, configKeypairs } = generateDefaultConfigParams(ctx);
   await toTx(ctx, WhirlpoolIx.initializeConfigIx(ctx.program, configInitInfo)).buildAndExecute();
@@ -318,7 +319,8 @@ export async function buildTestPoolParams(
     tickSpacing,
     initSqrtPrice,
     funder,
-    reuseTokenA
+    reuseTokenA,
+    reuseTokenB,
   );
   return {
     configInitInfo,
@@ -339,7 +341,8 @@ export async function initTestPool(
   tickSpacing: number,
   initSqrtPrice = DEFAULT_SQRT_PRICE,
   funder?: Keypair,
-  reuseTokenA?: PublicKey
+  reuseTokenA?: PublicKey,
+  reuseTokenB?: PublicKey
 ) {
   const poolParams = await buildTestPoolParams(
     ctx,
@@ -347,7 +350,8 @@ export async function initTestPool(
     3000,
     initSqrtPrice,
     funder?.publicKey,
-    reuseTokenA
+    reuseTokenA,
+    reuseTokenB
   );
 
   return initTestPoolFromParams(ctx, poolParams, funder);
@@ -554,7 +558,8 @@ export async function initTestPoolWithTokens(
   tickSpacing: number,
   initSqrtPrice = DEFAULT_SQRT_PRICE,
   mintAmount = new anchor.BN("15000000000"),
-  reuseTokenA?: PublicKey
+  reuseTokenA?: PublicKey,
+  reuseTokenB?: PublicKey
 ) {
   const provider = ctx.provider;
 
@@ -563,7 +568,8 @@ export async function initTestPoolWithTokens(
     tickSpacing,
     initSqrtPrice,
     undefined,
-    reuseTokenA
+    reuseTokenA,
+    reuseTokenB
   );
 
   const { tokenMintA, tokenMintB, whirlpoolPda } = poolInitInfo;
@@ -830,7 +836,8 @@ export async function initTestPoolWithLiquidity(
   ctx: WhirlpoolContext,
   initSqrtPrice = DEFAULT_SQRT_PRICE,
   mintAmount = new anchor.BN("15000000000"),
-  reuseTokenA?: PublicKey
+  reuseTokenA?: PublicKey,
+  reuseTokenB?: PublicKey
 ) {
   const {
     poolInitInfo,
@@ -845,7 +852,8 @@ export async function initTestPoolWithLiquidity(
     TickSpacing.Standard,
     initSqrtPrice,
     mintAmount,
-    reuseTokenA
+    reuseTokenA,
+    reuseTokenB
   );
 
   const tickArrays = await initTickArrayRange(
